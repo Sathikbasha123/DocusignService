@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="DEV_HOME" value="var" />
+
+	<appender name="Console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="JsonConsole"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+			<!-- <customFields>{"traceId":"%X{mdc.traceId}"}</customFields> -->
+			<fieldNames>
+				<timestamp>timestamp</timestamp>
+				<thread>[ignore]</thread>
+				<levelValue>[ignore]</levelValue>
+				<stackTrace>exception</stackTrace>
+			</fieldNames>
+		</encoder>
+	</appender>
+	<appender name="JsonRollingFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${DEV_HOME}/logs/saaspe_log.log</file>
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+			<!-- <customFields>{"traceId":"%X{mdc.traceId}"}</customFields> -->
+			<fieldNames>
+				<timestamp>timestamp</timestamp>
+				<thread>[ignore]</thread>
+				<levelValue>[ignore]</levelValue>
+				<stackTrace>exception</stackTrace>
+			</fieldNames>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${DEV_HOME}/logs/saaspe_log.%d{yyyy-MM-dd-HH}.log
+			</fileNamePattern>
+		</rollingPolicy>
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>3GB</maxFileSize>
+		</triggeringPolicy>
+	</appender>
+	<root level="INFO">
+		<appender-ref ref="Console" />
+		<appender-ref ref="JsonConsole" />
+		<appender-ref ref="JsonRollingFile" />
+	</root>
+</configuration>

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saaspe-docusign-config
+  namespace: dev
+  labels:
+    app: saaspe-docusign
+data:
+  POSTGRES_URL: jdbc:postgresql://postgresdev-dev-svc:5432/postgres
+  POSTGRES_USERNAME: saaspeadmin
+  POSTGRES_PASSWORD: fG7GE9RhjqXODQb
+  MONGODB_SAASPEAZURE_HOST: mongodb-dev-svc
+  MONGODB_SAASPEAZURE_USERNAME: saaspeadmin
+  MONGODB_SAASPEAZURE_PASSWORD: 6a1LzfgGNJMPjJhyn362
+  MONGODB_SAASPEAZURE_DATABASE: cloudDev
+  MONGODB_MARKETPLACE_HOST: mongodb-dev-svc
+  MONGODB_MARKETPLACE_USERNAME: saaspeadmin
+  MONGODB_MARKETPLACE_PASSWORD: 6a1LzfgGNJMPjJhyn362
+  MONGODB_MARKETPLACE_DATABASE: marketplace
+  CURRENCY_URL: jdbc:postgresql://postgresdev-dev-svc:5432/currency
+  CURRENCY_USERNAME: saaspeadmin
+  CURRENCY_PASSWORD: fG7GE9RhjqXODQb

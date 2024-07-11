@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saaspe-docusign
+  namespace: {#namespace#}
+  labels:
+    app: saaspe-docusign
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saaspe-docusign
+  template:
+    metadata:
+      name: saaspe-docusign
+      labels:
+        app: saaspe-docusign
+    spec:
+      containers:
+        - name: saaspe-docusign
+          image: {#image#}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085
+          # livenessProbe:
+          #   httpGet:
+          #     port: 6060
+          #     path: /actuator/health/liveness
+          #   initialDelaySeconds: 300
+          #   initialDelaySeconds: 300
+          #   periodSeconds: 300
+          # readinessProbe:
+          #   httpGet:
+          #     port: 6060
+          #     path: /actuator/health/readiness
+          #   initialDelaySeconds: 300
+          #   initialDelaySeconds: 300
+          #   periodSeconds: 300
+          resources:
+            requests:
+              memory: "312Mi"
+              cpu: "350m"
+            limits:
+              memory: "512Mi"
+              cpu: "512m"
+          env:
+           - name: SPRING_DATASOURCE_URL       # Postgres URL variable
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: POSTGRES_URL        
+           - name: SPRING_DATASOURCE_USERNAME    # Postgres DB User Name
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: POSTGRES_USERNAME
+           - name: SPRING_DATASOURCE_PASSWORD    # Postgres DB Password
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: POSTGRES_PASSWORD
+           - name: SPRING_DATA_MONGODB_SAASPEAZURE_HOST    
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_SAASPEAZURE_HOST
+           - name: SPRING_DATA_MONGODB_SAASPEAZURE_USERNAME   
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_SAASPEAZURE_USERNAME
+           - name: SPRING_DATA_MONGODB_SAASPEAZURE_PASSWORD   
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_SAASPEAZURE_PASSWORD
+           - name: SPRING_DATA_MONGODB_SAASPEAZURE_DATABASE  
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_SAASPEAZURE_DATABASE                                 
+           - name: SPRING_DATA_MONGODB_MARKETPLACE_HOST  
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_MARKETPLACE_HOST
+           - name: SPRING_DATA_MONGODB_MARKETPLACE_USERNAME
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_MARKETPLACE_USERNAME
+           - name: SPRING_DATA_MONGODB_MARKETPLACE_PASSWORD
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_MARKETPLACE_PASSWORD
+           - name: SPRING_DATA_MONGODB_MARKETPLACE_DATABASE
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: MONGODB_MARKETPLACE_DATABASE
+           - name: CURRENCY_DATASOURCE_URL
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: CURRENCY_URL  
+           - name: CURRENCY_DATASOURCE_USERNAME
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: CURRENCY_USERNAME
+           - name: CURRENCY_DATASOURCE_PASSWORD
+             valueFrom: 
+               configMapKeyRef:
+                 name: saaspe-docusign-config
+                 key: CURRENCY_PASSWORD                                   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saaspe-docusign-svc
+  namespace:  {#namespace#}
+  labels:
+    app: saaspe-docusign
+spec:
+  ports:
+    - port: 8085
+      targetPort: 8085
+  selector:
+    app: saaspe-docusign
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saaspe-docusign-config
+  namespace: {#namespace#}
+  labels:
+    app: saaspe-docusign
+data:
+  POSTGRES_URL: jdbc:postgresql://postgresdev-dev-svc:5432/postgres
+  POSTGRES_USERNAME: saaspeadmin
+  POSTGRES_PASSWORD: fG7GE9RhjqXODQb
+  MONGODB_SAASPEAZURE_HOST: mongodb-dev-svc
+  MONGODB_SAASPEAZURE_USERNAME: saaspeadmin
+  MONGODB_SAASPEAZURE_PASSWORD: 6a1LzfgGNJMPjJhyn362
+  MONGODB_SAASPEAZURE_DATABASE: cloudDev
+  MONGODB_MARKETPLACE_HOST: mongodb-dev-svc
+  MONGODB_MARKETPLACE_USERNAME: saaspeadmin
+  MONGODB_MARKETPLACE_PASSWORD: 6a1LzfgGNJMPjJhyn362
+  MONGODB_MARKETPLACE_DATABASE: marketplace
+  CURRENCY_URL: jdbc:postgresql://postgresdev-dev-svc:5432/currency
+  CURRENCY_USERNAME: saaspeadmin
+  CURRENCY_PASSWORD: fG7GE9RhjqXODQb
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: saaspe-docusign-ingress
+  namespace: {#namespace#}
+spec:
+  rules:
+  - host: {#host#}
+    http:
+      paths:
+      - backend:
+          service:
+            name: saaspe-docusign-svc
+            port:
+              number: 8085
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - {#host#}
+    secretName: saspe-app-tls1
